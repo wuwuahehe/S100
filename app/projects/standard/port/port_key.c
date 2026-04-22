@@ -69,9 +69,9 @@ u8 check_key_double_configure(u16 key_val)
 
 AT(.com_rodata.adkey.table)
 const adkey_tbl_t adkey_table[] = {
-    {0x77, NO_KEY},       //NEXT/VOL+     5.1K,
-//    {0x6C, NO_KEY},             //NEXT/VOL+     5.1K,
-    {0x97, NO_KEY},           //MODE          10K,
+    {0x2F, NO_KEY},       //NEXT/VOL+     5.1K,
+//    {0x69, NO_KEY},             //NEXT/VOL+     5.1K,
+    {0x32, NO_KEY},           //MODE          10K,
     {0xC1, NO_KEY},          //HSF           22K,
     {0xFF, NO_KEY},          //              END
 };
@@ -186,10 +186,10 @@ u8 *get_adkey2_configure(u8 num)
 AT(.com_rodata.pwrkey.table)
 const adkey_tbl_t pwrkey_table[6] = {
     {0x08, KEY_PLAY_POWER},     //P/P POWER     0
-    {0x3A, KEY_PREV_VOL_DOWN},  //PREV/VOL-     64
-    {0x7B, KEY_NEXT_VOL_UP},    //NEXT/VOL+     129
-    {0xC0, KEY_MODE},           //MODE          192
-    {0xF8, KEY_HSF},            //HSF           238
+    {0x23, KEY_AB_PLAY},  //PREV/VOL-     100
+    {0x64, KEY_PREV_VOL_DOWN},    //NEXT/VOL+     129
+    {0xA0, KEY_NEXT_VOL_UP},           //MODE          192  KEY_MODE
+    {0xC0, KEY_HSF},            //HSF           238
     {0xFF, NO_KEY},
 };
 

@@ -6,7 +6,7 @@
         <add key="func_aux_en" value="True" />
         <add key="func_fmrx_en" value="True" />
         <add key="powkey_10s_reset" value="False" />
-        <add key="spk_mute_en" value="False" />
+        <add key="spk_mute_en" value="True" />
         <add key="spk_mute_io_sel" value="0" />
         <add key="high_mute" value="False" />
         <add key="loudspeaker_unmute_delay" value="6" />
@@ -100,7 +100,7 @@
         <add key="music_ape_support" value="False" />
         <add key="music_flac_support" value="False" />
         <add key="music_sdcard_en" value="True" />
-        <add key="music_udisk_en" value="False" />
+        <add key="music_udisk_en" value="True" />
         <add key="sddet_iosel" value="28" />
         <add key="sd1det_iosel" value="0" />
         <add key="fmrx_r_val" value="128" />
@@ -127,15 +127,15 @@
         <add key="double_key_time" value="1" />
         <add key="adkey_ch" value="ADCCH_PE7" />
         <add key="adkey2_ch" value="ADCCH_PE6" />
-        <add key="pwron_press_time" value="3" />
-        <add key="pwroff_press_time" value="3" />
+        <add key="pwron_press_time" value="1" />
+        <add key="pwroff_press_time" value="0" />
         <add key="key_multi_config_en" value="False" />
         <add key="dblkey_num0" value="PP/POWER" />
         <add key="dblkey_num1" value="P/P" />
         <add key="dblkey_num2" value="VOL+/NEXT" />
         <add key="dblkey_num3" value="VOL-/PREV" />
         <add key="dblkey_num4" value="HSF" />
-        <add key="pwrkey_config_en" value="True" />
+        <add key="pwrkey_config_en" value="False" />
         <add key="pwrkey_num0" value="MODE/POWER" />
         <add key="pwrkey_num1" value="A-B" />
         <add key="pwrkey_num2" value="NEXT/VOL+" />

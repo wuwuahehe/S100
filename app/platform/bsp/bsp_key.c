@@ -173,11 +173,11 @@ static u8 get_adkey(u8 key_val, u8 key_config_en)
     while (key_val > adkey_table[num].adc_val) {
         num++;
     }
-   static u8 ticks = 0;
-   if(tick_check_expire(ticks,100)){
-          ticks = tick_get();
-          printf("key_val=%d,num=%d,sys_cb.aux_sd_detect_flag=%d\n",key_val,num,sys_cb.aux_sd_detect_flag);
-   }
+//    static u8 ticks = 0;
+//    if(tick_check_expire(ticks,100)){
+//           ticks = tick_get();
+//           printf("key_val=%d,num=%d,sys_cb.aux_sd_detect_flag=%d\n",key_val,num,sys_cb.aux_sd_detect_flag);
+//    }
 
     //工具配置了第一组ADKEY的按键定义？
     ptr = get_adkey_configure(num);

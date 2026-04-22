@@ -120,7 +120,7 @@ void rgb_spi_run_2(void);
 
 
 //#define LED_NUM         16
-#define LED_NUM         4
+#define LED_NUM         7
 #define LED_MODE_NUM    13
 
 //颜色定义 (r-g-b-rg-rb-gb-rgb)

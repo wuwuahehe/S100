@@ -41,7 +41,18 @@ void func_aux_message(u16 msg)
 
         case EVT_LINEIN_REMOVE:
             sys_cb.aux_sd_flag = 0;
-            func_cb.sta = func_cb.last;
+            printf("1111111144EVT_LINEIN_REMOVE\n");
+            if(sys_cb.aux_sd_detect_flag == 1) {
+                // AUX拔出了，但如果ADC检测到SD还在，直接切回 SD音乐模式
+                func_cb.sta = FUNC_MUSIC;
+                sys_cb.cur_dev = DEV_SDCARD; // 同步指针
+                sys_cb.aux_sd_flag2 = 0;
+            } else {
+                // 全空了，强制回蓝牙
+                func_cb.sta = FUNC_BT;
+                sys_cb.aux_sd_flag = 0;
+                sys_cb.aux_sd_flag2 = 0;
+            }
             break;
 
         case KU_REC:

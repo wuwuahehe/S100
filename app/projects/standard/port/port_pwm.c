@@ -537,30 +537,34 @@ void  rgb_spi_single_color_two_bright_two_extinguish()//亮两灯，熄灭两灯
     }
     timr_cnt = 0;
     WDT_CLR();
-    static u8 mode_color= 0;
+    
+    static u8 mode_color = 0;
     mode_color++;
-    if(mode_color>=12){
+    if(mode_color >= 12){
         mode_color = 0;
     }
-    rgb_data = led_color_select(mode_color/2);//红色
+    
+    rgb_data = led_color_select(mode_color / 2);
 
-    if(mode_color%2){
-        data_fill[0] = rgb_data;
-        data_fill[1] = 0X00;
-        data_fill[2] = 0X00;
-        data_fill[3] = rgb_data;
+    // 【核心优化】：使用偏移量和除法动态判断
+    // 当 mode_color 为偶数时 offset=0，奇数时 offset=1
+    u8 offset = mode_color % 2; 
+
+    for(u8 i = 0; i < LED_NUM; i++)
+    {
+        // (i + offset*2)/2 % 2 会产生两两交替的序列
+        // 例如7个灯的状态会在 [亮,亮,灭,灭,亮,亮,灭] 和 [灭,灭,亮,亮,灭,灭,亮] 之间切换
+        if(((i + offset * 2) / 2) % 2 == 0){
+            data_fill[i] = rgb_data;
     }else{
-        data_fill[0] = 0X00;
-        data_fill[1] = rgb_data;
-        data_fill[2] = rgb_data;
-        data_fill[3] = 0X00;
+            data_fill[i] = 0X00; // 熄灭
+        }
     }
 
-
-    memset(rgb_buf,0xc0,sizeof(rgb_buf));//清除rgb数据BUF
-    for(u8 i=0;i<LED_NUM;i++)
+    memset(rgb_buf, 0xC0, sizeof(rgb_buf)); // 清除rgb数据BUF
+    for(u8 i = 0; i < LED_NUM; i++)
     {
-      led_rgb_5050_data_fill(data_fill[i],i);//填充rgb数据BUF
+      led_rgb_5050_data_fill(data_fill[i], i); // 填充rgb数据BUF
     }
     spi1_senddata();
 }
@@ -666,10 +670,10 @@ void rgb_spi_rainbow(void)
 
 u8 mode_change_flag;
 AT(.com_text.rgb)
-void  rgb_spi_single_color_18()
+void rgb_spi_single_color_18() // 单灯跑马 + 逐渐堆叠效果
 {
-    static u8 led_color;
-    static u16 timr_cnt;
+    static u8 led_color = 0;
+    static u16 timr_cnt = 0;
 
     if(timr_cnt++ < 20 && (!mode_change_flag)){ //调节速度
         return;
@@ -678,63 +682,48 @@ void  rgb_spi_single_color_18()
     timr_cnt = 0;
     WDT_CLR();
 
-    static u8 led_cnt =0;
-
+    static u8 led_cnt = 0;
+    // 【核心优化】：整个周期不再是死板的18，而是根据灯珠数量动态计算
+    u8 max_cnt = LED_NUM * 3; // 如果是7个灯，周期就是21步
 
     led_cnt++;
-
-    if(led_cnt>=18){
+    if(led_cnt >= max_cnt){
         led_cnt = 0;
         led_color++;
-        if(led_color>=6){
+        if(led_color >= 6){
             led_color = 0;
         }
     }
 
-    rgb_data = led_color_select(led_color);//红色
-    for(u8 i=0;i<LED_NUM;i++)
+    rgb_data = led_color_select(led_color);
+    
+    // 先把所有灯清零
+    for(u8 i = 0; i < LED_NUM; i++)
     {
         data_fill[i] = 0x00;
     }
 
-    if(led_cnt<12){
-        data_fill[led_cnt%4] = rgb_data;
+    // 【动态效果计算】
+    if(led_cnt < (LED_NUM * 2)){
+        // 阶段1：单点跑动（跑两圈）
+        // 取模运算保证只亮当前移动到的一颗灯
+        data_fill[led_cnt % LED_NUM] = rgb_data;
     }
-    else if(led_cnt == 12){
-        data_fill[0] = rgb_data;
-        data_fill[3] = rgb_data;
+    else {
+        // 阶段2：从头到尾逐渐填满（堆叠）
+        // fill_level 计算当前应该点亮多少颗灯 (1 到 LED_NUM)
+        u8 fill_level = led_cnt - (LED_NUM * 2) + 1;
+        for(u8 i = 0; i < fill_level; i++){
+            data_fill[i] = rgb_data;
     }
-    else if(led_cnt == 13){
-        data_fill[1] = rgb_data;
-        data_fill[3] = rgb_data;
     }
-    else if(led_cnt == 14){
-        data_fill[2] = rgb_data;
-        data_fill[3] = rgb_data;
-    }
-    else if(led_cnt == 15){
-        data_fill[0] = rgb_data;
-        data_fill[2] = rgb_data;
-        data_fill[3] = rgb_data;
-    }
-    else if(led_cnt == 16){
-        data_fill[1] = rgb_data;
-        data_fill[2] = rgb_data;
-        data_fill[3] = rgb_data;
-    }
-    else if(led_cnt == 17){
-        data_fill[0] = rgb_data;
-        data_fill[1] = rgb_data;
-        data_fill[2] = rgb_data;
-        data_fill[3] = rgb_data;
-    }
-    memset(rgb_buf,0xc0,sizeof(rgb_buf));//清除rgb数据BUF
-    for(u8 i=0;i<LED_NUM;i++)
+
+    memset(rgb_buf, 0xC0, sizeof(rgb_buf));
+    for(u8 i = 0; i < LED_NUM; i++)
     {
-      led_rgb_5050_data_fill(data_fill[i],i);//填充rgb数据BUF
+      led_rgb_5050_data_fill(data_fill[i], i);
     }
     spi1_senddata();
-
 }
 
 AT(.com_text.rgb)
@@ -745,41 +734,36 @@ void  rgb_spi_single_color_four_bright()//两两成对，显示不同颜色
     }
     timr_cnt = 0;
     WDT_CLR();
-    static u8 led_color_1=1;
-    static u8 led_color=0;
+    
+    static u8 led_color_1 = 1;
+    static u8 led_color = 0;
 
     led_color++;
-    if(led_color>=6){
-        led_color = 0;
-    }
+    if(led_color >= 6) led_color = 0;
 
     led_color_1++;
-    if(led_color_1>=6){
-        led_color_1 = 0;
-    }
-    rgb_data = led_color_select(led_color);//红色
-    rgb_data_1 = led_color_select(led_color_1);//绿色
+    if(led_color_1 >= 6) led_color_1 = 0;
+    
+    rgb_data = led_color_select(led_color);     // 颜色A
+    rgb_data_1 = led_color_select(led_color_1); // 颜色B
 
-     static u8 rgb_flag =0;
-    if(rgb_flag ==0){
-        data_fill[0] = rgb_data;
-        data_fill[1] = rgb_data;
+    static u8 rgb_flag = 0;
+    rgb_flag = !rgb_flag; // 每次进入在 0 和 1 之间翻转
 
-        data_fill[2] = rgb_data_1;
-        data_fill[3] = rgb_data_1;
-        rgb_flag =1;
-    }else{
-        data_fill[0] = rgb_data_1;
-        data_fill[1] = rgb_data_1;
-
-        data_fill[2] = rgb_data;
-        data_fill[3] = rgb_data;
-        rgb_flag =0;
-    }
-    memset(rgb_buf,0xc0,sizeof(rgb_buf));//清除rgb数据BUF
-    for(u8 i=0;i<LED_NUM;i++)
+    // 【核心优化】：遍历所有灯，动态按对赋予两种颜色
+    for(u8 i = 0; i < LED_NUM; i++)
     {
-      led_rgb_5050_data_fill(data_fill[i],i);//填充rgb数据BUF
+        if(((i / 2) % 2) == rgb_flag){
+            data_fill[i] = rgb_data;
+    }else{
+            data_fill[i] = rgb_data_1;
+        }
+    }
+    
+    memset(rgb_buf, 0xC0, sizeof(rgb_buf));
+    for(u8 i = 0; i < LED_NUM; i++)
+    {
+      led_rgb_5050_data_fill(data_fill[i], i);
     }
     spi1_senddata();
 }
@@ -864,66 +848,66 @@ void rgb_spi_run(void)
         {
             rgb_spi_single_color_gradient_fast();  //模式七
         }
-//        else if(sys_cb.rgb_mode == 7)
-//        {
-//            rgb_spi_single_color_mode(0); //红色
-//        }
-//         else if(sys_cb.rgb_mode == 8)
-//        {
-//            rgb_spi_single_color_mode(1); //绿色
-//        }
-//        else if(sys_cb.rgb_mode == 9)
-//        {
-//            rgb_spi_single_color_mode(2); //蓝色
-//        }
-//         else if(sys_cb.rgb_mode == 10)
-//        {
-//            rgb_spi_single_color_mode(3); //黄色
-//        }
-//         else if(sys_cb.rgb_mode == 11)
-//        {
-//            rgb_spi_single_color_mode(4); //青色
-//        }
-//         else if(sys_cb.rgb_mode == 12)
-//        {
-//            rgb_spi_single_color_mode(5); //紫色
-//        }
+       else if(sys_cb.rgb_mode == 7)
+       {
+           rgb_spi_single_color_mode(0); //红色
+       }
+    //     else if(sys_cb.rgb_mode == 8)
+    //    {
+    //        rgb_spi_single_color_mode(1); //绿色
+    //    }
+    //    else if(sys_cb.rgb_mode == 9)
+    //    {
+    //        rgb_spi_single_color_mode(2); //蓝色
+    //    }
+    //     else if(sys_cb.rgb_mode == 10)
+    //    {
+    //        rgb_spi_single_color_mode(3); //黄色
+    //    }
+    //     else if(sys_cb.rgb_mode == 11)
+    //    {
+    //        rgb_spi_single_color_mode(4); //青色
+    //    }
+    //     else if(sys_cb.rgb_mode == 12)
+    //    {
+    //        rgb_spi_single_color_mode(5); //紫色
+    //    }
          else if(sys_cb.rgb_mode == 13)
         {
             rgb_spi_off();//关灯模式
         }
 }
 
-AT(.com_text.rgb)
-void rgb_spi_run_2(void)
-{
+// AT(.com_text.rgb)
+// void rgb_spi_run_2(void)
+// {
 
-        if(sys_cb.rgb_mode == 7)
-        {
-            rgb_spi_single_color_mode(0); //红色
-        }
-         else if(sys_cb.rgb_mode == 8)
-        {
-            rgb_spi_single_color_mode(1); //绿色
-        }
-        else if(sys_cb.rgb_mode == 9)
-        {
-            rgb_spi_single_color_mode(2); //蓝色
-        }
-         else if(sys_cb.rgb_mode == 10)
-        {
-            rgb_spi_single_color_mode(3); //黄色
-        }
-         else if(sys_cb.rgb_mode == 11)
-        {
-            rgb_spi_single_color_mode(4); //青色
-        }
-         else if(sys_cb.rgb_mode == 12)
-        {
-            rgb_spi_single_color_mode(5); //紫色
-        }
+//         if(sys_cb.rgb_mode == 7)
+//         {
+//             rgb_spi_single_color_mode(0); //红色
+//         }
+//          else if(sys_cb.rgb_mode == 8)
+//         {
+//             rgb_spi_single_color_mode(1); //绿色
+//         }
+//         else if(sys_cb.rgb_mode == 9)
+//         {
+//             rgb_spi_single_color_mode(2); //蓝色
+//         }
+//          else if(sys_cb.rgb_mode == 10)
+//         {
+//             rgb_spi_single_color_mode(3); //黄色
+//         }
+//          else if(sys_cb.rgb_mode == 11)
+//         {
+//             rgb_spi_single_color_mode(4); //青色
+//         }
+//          else if(sys_cb.rgb_mode == 12)
+//         {
+//             rgb_spi_single_color_mode(5); //紫色
+//         }
 
-}
+// }
 
 #endif // RGB_SERIAL_EN
 

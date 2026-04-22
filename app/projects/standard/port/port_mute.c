@@ -44,8 +44,8 @@ void loudspeaker_mute(void)
 //    } else {
 //        p->sfr[GPIOxCLR] = BIT(p->num);
 //    }
+    vusb_output_low();
 
-    vusb_output_high();
 
 }
 
@@ -83,7 +83,7 @@ void loudspeaker_unmute(void)
 //        }
 //    }
 
-    vusb_output_low();
+    vusb_output_high();
 }
 
 AT(.text.mute)

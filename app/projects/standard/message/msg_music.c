@@ -152,6 +152,19 @@ void func_music_message(u16 msg)
         case EVT_SD_REMOVE:
             sys_cb.aux_sd_flag = 0;
             func_music_remove_device(DEV_SDCARD);
+            //printf("11111111154EVT_SD_REMOVE\n");
+            if(sys_cb.aux_sd_detect_flag == 2) {
+                // SD拔出了，但如果ADC检测到AUX还在，直接切回 AUX
+                func_cb.sta = FUNC_AUX;
+                sys_cb.aux_sd_flag2 = 0; 
+            } 
+            else 
+            {
+                // 如果全空了，强制斩断去FM的念想，直接指定回蓝牙
+                func_cb.sta = FUNC_BT; 
+                sys_cb.aux_sd_flag = 0;
+                sys_cb.aux_sd_flag2 = 0;
+            }
             break;
 
         case EVT_SD1_REMOVE:
