@@ -102,4 +102,8 @@ void func_huart(void);
 void func_exspifalsh_music(void);
 void func_tom_cat(void);
 void func_bt_warning(void);
+// 设备历史栈对外接口
+void dev_stack_push(u8 dev);
+void dev_stack_remove(u8 dev);
+void auto_switch_dev_from_stack(void);
 #endif // _FUNC_H

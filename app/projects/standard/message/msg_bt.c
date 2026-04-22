@@ -248,7 +248,7 @@ void sfunc_bt_call_message(u16 msg)
             bt_call_answer_incoming();  //接听第2路通话
         } else {
             bt_call_terminate();        //挂断当前通话
-            func_mp3_res_play(RES_BUF_CALLOUT_MP3, RES_LEN_CALLOUT_MP3);
+            //func_mp3_res_play(RES_BUF_CALLOUT_MP3, RES_LEN_CALLOUT_MP3);
         }
         break;
 

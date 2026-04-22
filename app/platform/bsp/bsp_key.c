@@ -239,7 +239,11 @@ static u8 get_pwrkey(void)
     while ((u8)key_val > pwrkey_table[num].adc_val) {
         num++;
     }
-
+//    static u8 ticks = 0;
+//    if(tick_check_expire(ticks,100)){
+//           ticks = tick_get();
+//           printf("key_val=%d,num=%d\n",key_val,num);
+//    }
     //工具配置了PWRKEY的按键定义？
     ptr = get_pwrkey_configure(num);
     if (ptr != NULL) {

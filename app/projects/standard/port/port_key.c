@@ -186,10 +186,10 @@ u8 *get_adkey2_configure(u8 num)
 AT(.com_rodata.pwrkey.table)
 const adkey_tbl_t pwrkey_table[6] = {
     {0x08, KEY_PLAY_POWER},     //P/P POWER     0
-    {0x23, KEY_AB_PLAY},  //PREV/VOL-     100
+    {0x23, KEY_MODE},  //PREV/VOL-     100
     {0x64, KEY_PREV_VOL_DOWN},    //NEXT/VOL+     129
     {0xA0, KEY_NEXT_VOL_UP},           //MODE          192  KEY_MODE
-    {0xC0, KEY_HSF},            //HSF           238
+    {0xDC, KEY_AB_PLAY},            //HSF           238
     {0xFF, NO_KEY},
 };
 

@@ -144,28 +144,40 @@ void func_music_message(u16 msg)
             gui_box_show_inputnum(msg - KEY_NUM_0);
             break;
 #endif // IR_NUMKEY_EN
-
-        case EVT_UDISK_REMOVE:
-            func_music_remove_device(DEV_UDISK);
+#if LINEIN_DETECT_EN
+        case EVT_LINEIN_REMOVE:
+            // 修复：在音乐模式下拔掉AUX，必须从历史栈抹掉幽灵
+            printf("Ghost AUX Removed\n");
+            dev_stack_remove(DEV_LINEIN); 
             break;
-
-        case EVT_SD_REMOVE:
-            sys_cb.aux_sd_flag = 0;
-            func_music_remove_device(DEV_SDCARD);
-            //printf("11111111154EVT_SD_REMOVE\n");
-            if(sys_cb.aux_sd_detect_flag == 2) {
-                // SD拔出了，但如果ADC检测到AUX还在，直接切回 AUX
-                func_cb.sta = FUNC_AUX;
-                sys_cb.aux_sd_flag2 = 0; 
-            } 
-            else 
-            {
-                // 如果全空了，强制斩断去FM的念想，直接指定回蓝牙
-                func_cb.sta = FUNC_BT; 
-                sys_cb.aux_sd_flag = 0;
-                sys_cb.aux_sd_flag2 = 0;
+#endif
+        case EVT_UDISK_REMOVE:
+        {   // 注意这里加了大括号，以限制局部变量的作用域
+            // 1. 【核心修复】：必须在调用原厂清理函数之前，提前记录状态！
+            bool is_cur_playing = (sys_cb.cur_dev == DEV_UDISK); 
+            
+            func_music_remove_device(DEV_UDISK); // 原厂清理 (会破坏 cur_dev 现场)
+            dev_stack_remove(DEV_UDISK);         // 从历史栈踢出
+            
+            if (is_cur_playing) {                // 2. 使用提前记录的变量进行判断
+                auto_switch_dev_from_stack();    // 智能回落
             }
             break;
+        }
+
+        case EVT_SD_REMOVE:
+        {   // 注意这里加了大括号
+            // 1. 【核心修复】：必须在调用原厂清理函数之前，提前记录状态！
+            bool is_cur_playing = (sys_cb.cur_dev == DEV_SDCARD); 
+            
+            func_music_remove_device(DEV_SDCARD); // 原厂清理 (会破坏 cur_dev 现场)
+            dev_stack_remove(DEV_SDCARD);         // 从历史栈踢出
+            
+            if (is_cur_playing) {                 // 2. 使用提前记录的变量进行判断
+                auto_switch_dev_from_stack();     // 智能回落
+            }
+            break;
+        }
 
         case EVT_SD1_REMOVE:
             func_music_remove_device(DEV_SDCARD1);
@@ -184,6 +196,7 @@ void func_music_message(u16 msg)
                 break;
             }
           #endif
+            dev_stack_push(DEV_UDISK); // 【新增】：在音乐模式下插入，压入栈顶
             func_music_insert_device(DEV_UDISK);
             break;
 
@@ -202,6 +215,8 @@ void func_music_message(u16 msg)
 		  	music_control(MUSIC_MSG_STOP);
 			sd_enable_user();
 		  #endif
+            dev_stack_push(DEV_SDCARD); // 【新增】：压入栈顶
+            sys_cb.cur_dev = DEV_SDCARD;
             func_music_insert_device(DEV_SDCARD);
             break;
 

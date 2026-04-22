@@ -40,21 +40,25 @@ void func_aux_message(u16 msg)
 #endif
 
         case EVT_LINEIN_REMOVE:
-            sys_cb.aux_sd_flag = 0;
-            printf("1111111144EVT_LINEIN_REMOVE\n");
-            if(sys_cb.aux_sd_detect_flag == 1) {
-                // AUX拔出了，但如果ADC检测到SD还在，直接切回 SD音乐模式
-                func_cb.sta = FUNC_MUSIC;
-                sys_cb.cur_dev = DEV_SDCARD; // 同步指针
-                sys_cb.aux_sd_flag2 = 0;
-            } else {
-                // 全空了，强制回蓝牙
-                func_cb.sta = FUNC_BT;
-                sys_cb.aux_sd_flag = 0;
-                sys_cb.aux_sd_flag2 = 0;
+            printf("EVT_LINEIN_REMOVE\n");
+            dev_stack_remove(DEV_LINEIN);  // 1. 【新增】：将AUX踢出历史栈
+            if (func_cb.sta == FUNC_AUX) {
+                auto_switch_dev_from_stack(); // 2. 【新增】：调用全局引擎智能回落
             }
             break;
+    #if MUSIC_SDCARD_EN
+        case EVT_SD_REMOVE:
+            printf("Ghost SD Removed\n");
+            dev_stack_remove(DEV_SDCARD);
+            break;
+    #endif
 
+    #if MUSIC_UDISK_EN
+        case EVT_UDISK_REMOVE:
+            printf("Ghost U-Disk Removed\n");
+            dev_stack_remove(DEV_UDISK);
+            break;
+    #endif
         case KU_REC:
 #if AUX_REC_EN || REC_WHITOUT_KARAOK
             if ((!dev_is_online(DEV_SDCARD)) && (!dev_is_online(DEV_UDISK) && (!dev_is_online(DEV_SDCARD1)))) {

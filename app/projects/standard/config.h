@@ -139,7 +139,7 @@
 #define BT_SPP_EN                       1   //是否打开蓝牙串口服务
 #define BT_HID_EN                       1   //是否打开蓝牙HID服务
 #define BT_HID_TYPE                     HID_TYPE_PHOTO1  //选择HID服务类型
-#define BT_HID_MENU_EN                  1   //蓝牙HID是否需要手动连接/断开
+#define BT_HID_MENU_EN                  0   //蓝牙HID是否需要手动连接/断开
 #define BT_HID_DISCON_DEFAULT_EN        0   //蓝牙HID服务默认不连接，需要手动进行连接。
 #define BT_HID_SIMPLE_KEYBOARD          0   //蓝牙HID，枚举成键盘，做音量加减，播放/暂停，上下曲切歌和唤醒语音助手 (需要把 BT_HID_TYPE 配置为3)
 #define BT_HFP_CALL_PRIVATE_EN          1   //是否使能私密接听与蓝牙接听切换功能
@@ -535,7 +535,7 @@
 #define PWM_RGB_EN                      0           //PWM RGB三色灯功能
 #define ENERGY_LED_EN                   0           //能量灯软件PWM显示,声音越大,点亮的灯越多.
 #define SYS_PARAM_RTCRAM                0           //是否系统参数保存到RTCRAM
-#define PWRON_ENTER_BTMODE_EN           0           //是否上电默认进蓝牙模式
+#define PWRON_ENTER_BTMODE_EN           1           //是否上电默认进蓝牙模式
 #define VBAT_DETECT_EN                  1           //电池电量检测功能
 #define VBAT2_ADCCH                     ADCCH_VBAT  //ADCCH_VBAT为内部1/2电压通路，带升压应用需要外部ADC通路检测1/2电池电压
 #define VBAT_FILTER_USE_PEAK            0           //电池检测滤波选则://0 取平均值.//1 取峰值(适用于播放音乐时,电池波动比较大的音箱方案).
@@ -655,7 +655,7 @@
 #define WARNING_BT_TWS_CONNECT          1
 #define WARNING_BT_TWS_DISCON           0
 #define WARNING_BT_INCALL               1
-#define WARNING_BT_CALLOUT              1
+#define WARNING_BT_CALLOUT              0
 #define WARNING_USB_SD                  1
 #define WARNING_MAX_VOLUME              1
 #define WARNING_MIN_VOLUME              0

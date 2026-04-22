@@ -62,8 +62,8 @@
         <add key="bt_a2dp_en" value="True" />
         <add key="bt_a2dp_vol_ctrl_en" value="True" />
         <add key="bt_sco_en" value="True" />
-        <add key="bt_hfp_private_en" value="False" />
-        <add key="bt_hfp_ring_number_en" value="True" />
+        <add key="bt_hfp_private_en" value="True" />
+        <add key="bt_hfp_ring_number_en" value="False" />
         <add key="bt_hfp_play_ios_ring_en" value="False" />
         <add key="bt_spp_en" value="False" />
         <add key="bt_hid_en" value="False" />

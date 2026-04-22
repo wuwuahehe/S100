@@ -91,10 +91,10 @@ extern const res_addr_t mul_lang_tbl[2][IDX_MAX_MP3];
 #define RES_LEN_CONNECTED_MP3       *mul_lang_tbl[sys_cb.lang_id][IDX_CONNECTED_MP3  ].len
 #define RES_BUF_DISCONNECT_MP3      *mul_lang_tbl[sys_cb.lang_id][IDX_DISCONNECT_MP3 ].ptr
 #define RES_LEN_DISCONNECT_MP3      *mul_lang_tbl[sys_cb.lang_id][IDX_DISCONNECT_MP3 ].len
-#define RES_BUF_CAMERA_ON_MP3       *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_ON_MP3  ].ptr
-#define RES_LEN_CAMERA_ON_MP3       *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_ON_MP3  ].len
-#define RES_BUF_CAMERA_OFF_MP3      *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_OFF_MP3 ].ptr
-#define RES_LEN_CAMERA_OFF_MP3      *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_OFF_MP3 ].len
+//#define RES_BUF_CAMERA_ON_MP3       *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_ON_MP3  ].ptr
+//#define RES_LEN_CAMERA_ON_MP3       *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_ON_MP3  ].len
+//#define RES_BUF_CAMERA_OFF_MP3      *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_OFF_MP3 ].ptr
+//#define RES_LEN_CAMERA_OFF_MP3      *mul_lang_tbl[sys_cb.lang_id][IDX_CAMERA_OFF_MP3 ].len
 //#define RES_BUF_CALL_HANGUP_MP3     *mul_lang_tbl[sys_cb.lang_id][IDX_CALL_HANGUP_MP3].ptr
 //#define RES_LEN_CALL_HANGUP_MP3     *mul_lang_tbl[sys_cb.lang_id][IDX_CALL_HANGUP_MP3].len
 //#define RES_BUF_CALL_REJECT_MP3     *mul_lang_tbl[sys_cb.lang_id][IDX_CALL_REJECT_MP3].ptr
@@ -178,8 +178,8 @@ extern const res_addr_t mul_lang_tbl[2][IDX_MAX_MP3];
 #define RES_LEN_TAKE_PHOTO_MP3          RES_LEN_ZH_TAKE_PHOTO_MP3
 #define RES_BUF_PRIV_CALL_MP3           RES_BUF_ZH_PRIV_CALL_MP3
 #define RES_LEN_PRIV_CALL_MP3           RES_LEN_ZH_PRIV_CALL_MP3
-#define RES_BUF_CALLOUT_MP3             RES_BUF_ZH_CALLOUT_MP3
-#define RES_LEN_CALLOUT_MP3             RES_LEN_ZH_CALLOUT_MP3
+//#define RES_BUF_CALLOUT_MP3             RES_BUF_ZH_CALLOUT_MP3
+//#define RES_LEN_CALLOUT_MP3             RES_LEN_ZH_CALLOUT_MP3
 #define RES_BUF_REC_START_MP3           RES_BUF_ZH_REC_START_MP3
 #define RES_LEN_REC_START_MP3           RES_LEN_ZH_REC_START_MP3
 
@@ -261,8 +261,8 @@ extern const res_addr_t mul_lang_tbl[2][IDX_MAX_MP3];
 #define RES_LEN_TAKE_PHOTO_MP3          RES_LEN_EN_TAKE_PHOTO_MP3
 #define RES_BUF_PRIV_CALL_MP3           RES_BUF_EN_PRIV_CALL_MP3
 #define RES_LEN_PRIV_CALL_MP3           RES_LEN_EN_PRIV_CALL_MP3
-#define RES_BUF_CALLOUT_MP3             RES_BUF_EN_CALLOUT_MP3
-#define RES_LEN_CALLOUT_MP3             RES_LEN_EN_CALLOUT_MP3
+//#define RES_BUF_CALLOUT_MP3             RES_BUF_EN_CALLOUT_MP3
+//#define RES_LEN_CALLOUT_MP3             RES_LEN_EN_CALLOUT_MP3
 #define RES_BUF_REC_START_MP3           RES_BUF_EN_REC_START_MP3
 #define RES_LEN_REC_START_MP3           RES_LEN_EN_REC_START_MP3
 

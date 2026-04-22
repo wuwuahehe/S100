@@ -120,6 +120,90 @@ void print_info_2(void)
     }
 }
 
+#define MAX_DEV_STACK_NUM 3
+static u8 dev_history_stack[MAX_DEV_STACK_NUM]; 
+static u8 dev_stack_cnt = 0;                    
+
+void dev_stack_push(u8 dev) {
+    u8 i, j;
+    for (i = 0; i < dev_stack_cnt; i++) {
+        if (dev_history_stack[i] == dev) {
+            for (j = i; j < dev_stack_cnt - 1; j++) {
+                dev_history_stack[j] = dev_history_stack[j + 1];
+            }
+            dev_stack_cnt--;
+            break;
+        }
+    }
+    if (dev_stack_cnt < MAX_DEV_STACK_NUM) {
+        dev_history_stack[dev_stack_cnt] = dev;
+        dev_stack_cnt++;
+    }
+}
+
+void dev_stack_remove(u8 dev) {
+    u8 i, j;
+    for (i = 0; i < dev_stack_cnt; i++) {
+        if (dev_history_stack[i] == dev) {
+            for (j = i; j < dev_stack_cnt - 1; j++) {
+                dev_history_stack[j] = dev_history_stack[j + 1];
+            }
+            dev_stack_cnt--;
+            return;
+        }
+    }
+}
+
+#define DEV_NONE 0xFF // 定义一个绝对不会和实体设备冲突的空值
+
+static u8 dev_stack_get_top(void) {
+    if (dev_stack_cnt > 0) {
+        return dev_history_stack[dev_stack_cnt - 1];
+    }
+    return DEV_NONE; // 修复：绝对不能返回 0，0 是 U盘！
+}
+// ================= 全局统一回落引擎 =================
+void auto_switch_dev_from_stack(void) {
+    sys_cb.aux_sd_flag = 0;   // 清除旧的标志位包袱
+    sys_cb.aux_sd_flag2 = 0;
+
+    while (dev_stack_cnt > 0) {
+        u8 top_dev = dev_stack_get_top();
+        bool is_real_online = false;
+
+        // 根据具体设备验证物理在线状态
+        if (top_dev == DEV_UDISK && dev_is_online(DEV_UDISK)) {
+            is_real_online = true;
+        } else if (top_dev == DEV_SDCARD && (sys_cb.aux_sd_detect_flag & 0x01)) {
+            is_real_online = true;
+        } else if (top_dev == DEV_LINEIN && (sys_cb.aux_sd_detect_flag & 0x02)) {
+            is_real_online = true;
+        }
+
+        if (!is_real_online) {
+            dev_stack_remove(top_dev); // 物理已拔出，从栈中剔除
+        } else {
+            break; // 找到了真正存活的设备
+        }
+    }
+
+    u8 target_dev = dev_stack_get_top();
+
+    if (target_dev == DEV_UDISK) {
+        sys_cb.cur_dev = DEV_UDISK;
+        func_cb.sta = FUNC_MUSIC;
+    } else if (target_dev == DEV_SDCARD) {
+        sys_cb.cur_dev = DEV_SDCARD;
+        func_cb.sta = FUNC_MUSIC;
+    } else if (target_dev == DEV_LINEIN) {
+        func_cb.sta = FUNC_AUX;
+    } else {
+        // 如果 target_dev 是 DEV_NONE，安全降落到蓝牙！
+        func_cb.sta = FUNC_BT; 
+        printf("Stack Empty -> BT\n");
+    }
+}
+
 AT(.text.func.process)
 void func_process(void)
 {
@@ -330,9 +414,12 @@ void func_message(u16 msg)
 #if SD_USB_MUX_IO_EN
                 sys_cb.cur_dev = DEV_UDISK;
 #endif // SD_USB_MUX_IO_EN
+                // 必须等待 USB 枚举和文件系统挂载成功！
                 if (dev_udisk_activation_try(0)) {
-                    sys_cb.cur_dev = DEV_UDISK;
-                    func_cb.sta = FUNC_MUSIC;
+                    dev_stack_push(DEV_UDISK);     // 1. 【新增】：压入历史栈顶
+                    sys_cb.cur_dev = DEV_UDISK;    // 2. 指定当前物理设备
+                    func_cb.sta = FUNC_MUSIC;      // 3. 切入音乐模式
+                    printf("U-disk Pushed!\n");
                 }
             }
             break;
@@ -340,18 +427,12 @@ void func_message(u16 msg)
 
 #if MUSIC_SDCARD_EN
         case EVT_SD_INSERT:
-            if (dev_is_online(DEV_SDCARD)) {
-                sys_cb.cur_dev = DEV_SDCARD;
-                if(sys_cb.aux_sd_detect_flag==1){
-                    func_cb.sta = FUNC_MUSIC;
-                    sys_cb.aux_sd_flag = 1;
-                }else if(sys_cb.aux_sd_detect_flag==3){
-                    if(sys_cb.aux_sd_flag2 ==2){
-                        func_cb.sta = FUNC_MUSIC;
-                        sys_cb.aux_sd_flag2 = 0;
-                    }
-                    printf("sys_cb.aux_sd_detect_flag_sd = %d\n",sys_cb.aux_sd_detect_flag);
-                }
+            // 双重校验：底层驱动在线 && ADC分压状态确实有SD卡 (状态1或3)
+            if (dev_is_online(DEV_SDCARD) && (sys_cb.aux_sd_detect_flag & 0x01)) {
+                dev_stack_push(DEV_SDCARD);        // 1. 【核心】：压入栈顶，取代所有冗长的 flag 判断！
+                sys_cb.cur_dev = DEV_SDCARD;       // 2. 指定当前物理设备
+                func_cb.sta = FUNC_MUSIC;          // 3. 切入音乐模式
+                printf("SD Card Pushed!\n");
             }
             break;
 #endif // MUSIC_SDCARD_EN
@@ -380,15 +461,11 @@ void func_message(u16 msg)
                 sys_cb.pwrdwn_tone_en = LINEIN_2_PWRDOWN_TONE_EN;
                 func_cb.sta = FUNC_PWROFF;
 #else
-                if(sys_cb.aux_sd_detect_flag==2){
-                    func_cb.sta = FUNC_AUX;
-                    sys_cb.aux_sd_flag = 1;
-                }else if(sys_cb.aux_sd_detect_flag==3){
-                   if(sys_cb.aux_sd_flag2 ==1){
-                        func_cb.sta = FUNC_AUX;
-                        sys_cb.aux_sd_flag2 = 0;
-                    }
-                    printf("sys_cb.aux_sd_detect_flag = %d\n",sys_cb.aux_sd_detect_flag);
+                // 双重校验：底层检测在线 && ADC分压状态确实有AUX (状态2或3)
+                if (sys_cb.aux_sd_detect_flag & 0x02) {
+                    dev_stack_push(DEV_LINEIN);    // 1. 【核心】：压入栈顶，彻底告别 flag 判断！
+                    func_cb.sta = FUNC_AUX;        // 2. 切入AUX模式
+                    printf("AUX Pushed!\n");
                 }
 #endif // LINEIN_2_PWRDOWN_EN
             }
