@@ -166,7 +166,7 @@ u8 get_usbtf_muxio(void)
 u8 cfg_usbchk_custom_en = USB_CUSTOM_DETECT;
 
 
-#define USB_DETECT_DEBUG    0       //USB插拔打印
+#define USB_DETECT_DEBUG    1       //USB插拔打印
 #if USB_DETECT_DEBUG
 //AT(.com_text.str_usbdetdbg)
 //const char str_usb_detect[] = "USB STA:%d\n";
@@ -223,7 +223,7 @@ void usb_detect(void)
      usb_chk_sta = 0;
 
 #endif
-//	printf(str_usb_detect, usb_sta);
+	//printf(str_usb_detect, usb_sta);
 
     if (usb_sta == USB_UDISK_CONNECTED) {
         if (dev_online_filter(DEV_UDISK)) {
